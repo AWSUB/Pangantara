@@ -10,11 +10,8 @@ type Supplier struct {
 	Address       *string   `gorm:"type:varchar"                                    json:"address,omitempty"`
 	ContactNumber *string   `gorm:"type:varchar(20)"                                json:"contact_number,omitempty"`
 	AdminNotes    *string   `gorm:"type:text"                                       json:"admin_notes,omitempty"`
-
-	User    User      `gorm:"foreignKey:UserID"     json:"-"`
-	Product []Product `gorm:"foreignKey:SupplierID" json:"products,omitempty"`
 }
 
-func (Supplier) TableName() string { 
-	return "suppliers"
+func (Supplier) TableName() string {
+	return "suppliers" 
 }

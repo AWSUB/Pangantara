@@ -15,8 +15,6 @@ type Transaction struct {
 	PaymentProof  *string       `gorm:"type:varchar(255)"                               json:"payment_proof,omitempty"`
 	PaymentDate   *time.Time    `gorm:"type:timestamp"                                  json:"payment_date,omitempty"`
 	AmountPaid    float64       `gorm:"type:decimal(14,2);not null;default:0"           json:"amount_paid"`
-	
-	Order Order `gorm:"foreignKey:OrderID" json:"-"`
 }
 
 func (Transaction) TableName() string { 

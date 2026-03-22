@@ -1,8 +1,11 @@
 package main
 
 import (
-	
+	"sppg-backend/config"
+	"sppg-backend/internal/app"
 )
-func main(){
-	
+
+func main() {
+	config.NewConfig()
+	app.Run()
 }

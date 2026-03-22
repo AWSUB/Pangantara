@@ -9,11 +9,8 @@ type SPPG struct {
 	NameSPPG    string    `gorm:"type:varchar(150);not null"                      json:"name_sppg"`
 	LocationURL *string   `gorm:"type:varchar"                                    json:"location_url,omitempty"`
 	Contact     *string   `gorm:"type:varchar(20)"                                json:"contact,omitempty"`
-
-	User  User    `gorm:"foreignKey:UserID" json:"-"`
-	Order []Order `gorm:"foreignKey:SPPGID" json:"orders,omitempty"`
 }
 
-func (SPPG) TableName() string {
-	return "sppg"
+func (SPPG) TableName() string { 
+	return "sppg" 
 }

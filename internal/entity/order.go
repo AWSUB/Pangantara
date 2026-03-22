@@ -14,10 +14,6 @@ type Order struct {
 	OrderStatus OrderStatus `gorm:"type:varchar(30);not null;default:'pending'"     json:"order_status"`
 	TotalAmount float64     `gorm:"type:decimal(14,2);not null;default:0"           json:"total_amount"`
 	Notes       *string     `gorm:"type:text"                                       json:"notes,omitempty"`
-
-	SPPG        SPPG          `gorm:"foreignKey:SPPGID"  json:"-"`
-	OrderDetail []OrderDetail  `gorm:"foreignKey:OrderID" json:"order_details,omitempty"`
-	Transaction *Transaction   `gorm:"foreignKey:OrderID" json:"transaction,omitempty"`
 }
 
 func (Order) TableName() string { 

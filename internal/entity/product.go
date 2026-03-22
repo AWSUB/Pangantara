@@ -11,12 +11,8 @@ type Product struct {
 	Price       float64   `gorm:"type:decimal(12,2);not null;default:0"           json:"price"`
 	Unit        *string   `gorm:"type:varchar(50)"                                json:"unit,omitempty"`
 	ImageURL    *string   `gorm:"type:varchar(255)"                               json:"image_url,omitempty"`
-
-	Supplier    Supplier      `gorm:"foreignKey:SupplierID" json:"-"`
-	Stock       []Stock       `gorm:"foreignKey:ProductID"  json:"stock,omitempty"`
-	OrderDetail []OrderDetail `gorm:"foreignKey:ProductID"  json:"order_details,omitempty"`
 }
 
 func (Product) TableName() string { 
-	return "products"
-	}
+	return "products" 
+}

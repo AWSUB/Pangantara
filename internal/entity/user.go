@@ -9,9 +9,6 @@ type User struct {
 	Email    string    `gorm:"type:varchar(100);not null;uniqueIndex"          json:"email"`
 	Password string    `gorm:"type:varchar(250);not null"                      json:"-"`
 	Role     UserRole  `gorm:"type:varchar(20);not null;default:'sppg'"        json:"role"`
-
-	SPPG     []SPPG     `gorm:"foreignKey:UserID" json:"sppg,omitempty"`
-	Supplier []Supplier `gorm:"foreignKey:UserID" json:"supplier,omitempty"`
 }
 
 func (User) TableName() string { 
