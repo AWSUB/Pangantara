@@ -16,7 +16,7 @@ type Claims struct {
 }
 
 func GenerateToken(userID, email, role string) (string, error) {
-	expiredTime := time.Now().Add(time.Duration(config.AppConfig.JWTExpired) * time.Hour)
+	expiredTime := time.Now().Add(time.Duration(config.AppConfig.JWTExpiredMinute) * time.Minute)
 
 	claims := &Claims{
 		UserID: userID,

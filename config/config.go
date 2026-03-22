@@ -19,6 +19,7 @@ type Config struct {
 	AppEnv     string
 	JWTSecret  string
 	JWTExpired int
+	JWTExpiredMinute int 
 }
 
 var AppConfig *Config
@@ -29,23 +30,24 @@ func NewConfig() {
 	}
 
 	jwtExpired, _ := strconv.Atoi(getEnv("JWT_EXPIRED", "24"))
+	jwtExpiredMinute, _ := strconv.Atoi(getEnv("JWT_EXPIRED_MINUTE", "15")) // tambahkan ini
 
 	AppConfig = &Config{
-		DBHost:     getEnv("DB_HOST", "localhost"),
-		DBPort:     getEnv("DB_PORT", "5432"),
-		DBUser:     getEnv("DB_USER", "postgres"),
-		DBPassword: getEnv("DB_PASSWORD", "yourpassword"),
-		DBName:     getEnv("DB_NAME", "pangantara"),
-		DBSSLMode:  getEnv("DB_SSLMODE", "disable"),
-		AppPort:    getEnv("APP_PORT", "8080"),
-		AppEnv:     getEnv("APP_ENV", "development"),
-		JWTSecret:  getEnv("JWT_SECRET", "secret"),
-		JWTExpired: jwtExpired,
+		DBHost:           getEnv("DB_HOST", "localhost"),
+		DBPort:           getEnv("DB_PORT", "5432"),
+		DBUser:           getEnv("DB_USER", "postgres"),
+		DBPassword:       getEnv("DB_PASSWORD", "yourpassword"),
+		DBName:           getEnv("DB_NAME", "pangantara"),
+		DBSSLMode:        getEnv("DB_SSLMODE", "disable"),
+		AppPort:          getEnv("APP_PORT", "8080"),
+		AppEnv:           getEnv("APP_ENV", "development"),
+		JWTSecret:        getEnv("JWT_SECRET", "secret"),
+		JWTExpired:       jwtExpired,
+		JWTExpiredMinute: jwtExpiredMinute, // tambahkan ini
 	}
 
 	log.Println("Konfigurasi berhasil dimuat")
 }
-
 func getEnv(key, fallback string) string {
 	if val := os.Getenv(key); val != "" {
 		return val
