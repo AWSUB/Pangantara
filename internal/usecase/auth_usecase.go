@@ -47,18 +47,47 @@ func Login(req model.LoginRequest) (*model.LoginResponse, error) {
 		return nil, errors.New("email atau password salah")
 	}
 
-	// Generate token
-	token, err := jwt.GenerateToken(user.UserID.String(), user.Email, string(user.Role))
+	// Generate access token
+	accessToken, err := jwt.GenerateAccessToken(user.UserID.String(), user.Email, string(user.Role))
 	if err != nil {
 		return nil, err
 	}
 
-	response := model.LoginOK("Login berhasil", token, map[string]interface{}{
+	// Generate refresh token
+	refreshToken, err := jwt.GenerateRefreshToken(user.UserID.String(), user.Email, string(user.Role))
+	if err != nil {
+		return nil, err
+	}
+
+	response := model.LoginOK("Login berhasil", accessToken, refreshToken, map[string]interface{}{
 		"user_id": user.UserID,
 		"name":    user.Name,
 		"email":   user.Email,
 		"role":    user.Role,
 	})
 
+	return &response, nil
+}
+
+func RefreshToken(req model.RefreshTokenRequest) (*model.LoginResponse, error) {
+	// Validasi refresh token
+	claims, err := jwt.ValidateRefreshToken(req.RefreshToken)
+	if err != nil {
+		return nil, errors.New("refresh token tidak valid atau sudah expired")
+	}
+
+	// Generate access token baru
+	accessToken, err := jwt.GenerateAccessToken(claims.UserID, claims.Email, claims.Role)
+	if err != nil {
+		return nil, err
+	}
+
+	// Generate refresh token baru
+	refreshToken, err := jwt.GenerateRefreshToken(claims.UserID, claims.Email, claims.Role)
+	if err != nil {
+		return nil, err
+	}
+
+	response := model.LoginOK("Token berhasil diperbarui", accessToken, refreshToken, nil)
 	return &response, nil
 }

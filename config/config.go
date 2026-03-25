@@ -18,7 +18,6 @@ type Config struct {
 	AppPort    string
 	AppEnv     string
 	JWTSecret  string
-	JWTExpired int
 	JWTExpiredMinute int 
 }
 
@@ -29,8 +28,7 @@ func NewConfig() {
 		log.Println("File .env tidak ditemukan, menggunakan environment variable sistem")
 	}
 
-	jwtExpired, _ := strconv.Atoi(getEnv("JWT_EXPIRED", "24"))
-	jwtExpiredMinute, _ := strconv.Atoi(getEnv("JWT_EXPIRED_MINUTE", "15")) // tambahkan ini
+	jwtExpiredMinute, _ := strconv.Atoi(getEnv("JWT_EXPIRED_MINUTE", "15")) 
 
 	AppConfig = &Config{
 		DBHost:           getEnv("DB_HOST", "localhost"),
@@ -42,8 +40,7 @@ func NewConfig() {
 		AppPort:          getEnv("APP_PORT", "8080"),
 		AppEnv:           getEnv("APP_ENV", "development"),
 		JWTSecret:        getEnv("JWT_SECRET", "secret"),
-		JWTExpired:       jwtExpired,
-		JWTExpiredMinute: jwtExpiredMinute, // tambahkan ini
+		JWTExpiredMinute: jwtExpiredMinute, 
 	}
 
 	log.Println("Konfigurasi berhasil dimuat")

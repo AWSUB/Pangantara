@@ -13,6 +13,7 @@ func AuthRoutes(r *gin.RouterGroup) {
 	{
 		auth.POST("/register", register)
 		auth.POST("/login", login)
+		auth.POST("/refresh", refreshToken)
 	}
 }
 
@@ -27,7 +28,7 @@ func register(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, model.LoginFail(err.Error()))
 		return
 	}
-	c.JSON(http.StatusCreated, model.LoginOK("Register berhasil", "", data))
+	c.JSON(http.StatusCreated, model.LoginOK("Register berhasil", "", "", data))
 }
 
 func login(c *gin.Context) {
@@ -37,6 +38,20 @@ func login(c *gin.Context) {
 		return
 	}
 	response, err := usecase.Login(req)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, model.LoginFail(err.Error()))
+		return
+	}
+	c.JSON(http.StatusOK, response)
+}
+
+func refreshToken(c *gin.Context) {
+	var req model.RefreshTokenRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, model.LoginFail(err.Error()))
+		return
+	}
+	response, err := usecase.RefreshToken(req)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, model.LoginFail(err.Error()))
 		return
