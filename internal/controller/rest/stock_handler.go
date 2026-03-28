@@ -25,95 +25,95 @@ func StockRoutes(r *gin.RouterGroup) {
 func createStock(c *gin.Context) {
 	var req model.CreateStockRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, model.StockFail(err.Error()))
+		c.JSON(http.StatusBadRequest, model.ValidationError(err.Error()))
 		return
 	}
 	data, err := usecase.CreateStock(req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.StockFail(err.Error()))
+		c.JSON(http.StatusInternalServerError, model.InternalError())
 		return
 	}
-	c.JSON(http.StatusCreated, model.StockOK("Stock berhasil dibuat", data))
+	c.JSON(http.StatusCreated, model.Created(data))
 }
 
 func getAllStock(c *gin.Context) {
 	list, err := usecase.GetAllStock()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.StockFail(err.Error()))
+		c.JSON(http.StatusInternalServerError, model.InternalError())
 		return
 	}
-	c.JSON(http.StatusOK, model.StockOK("OK", list))
+	c.JSON(http.StatusOK, model.OK(list))
 }
 
 func getStockByID(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, model.StockFail("ID tidak valid"))
+		c.JSON(http.StatusBadRequest, model.BadRequest("Invalid ID format"))
 		return
 	}
 	data, err := usecase.GetStockByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, model.StockFail("Stock tidak ditemukan"))
+		c.JSON(http.StatusNotFound, model.NotFound("Stock"))
 		return
 	}
-	c.JSON(http.StatusOK, model.StockOK("OK", data))
+	c.JSON(http.StatusOK, model.OK(data))
 }
 
 func getStockByProductID(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("product_id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, model.StockFail("ID tidak valid"))
+		c.JSON(http.StatusBadRequest, model.BadRequest("Invalid ID format"))
 		return
 	}
 	data, err := usecase.GetStockByProductID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, model.StockFail("Stock tidak ditemukan"))
+		c.JSON(http.StatusNotFound, model.NotFound("Stock"))
 		return
 	}
-	c.JSON(http.StatusOK, model.StockOK("OK", data))
+	c.JSON(http.StatusOK, model.OK(data))
 }
 
 func getStockBySupplierID(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("supplier_id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, model.StockFail("ID tidak valid"))
+		c.JSON(http.StatusBadRequest, model.BadRequest("Invalid ID format"))
 		return
 	}
 	list, err := usecase.GetStockBySupplierID(id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.StockFail(err.Error()))
+		c.JSON(http.StatusInternalServerError, model.InternalError())
 		return
 	}
-	c.JSON(http.StatusOK, model.StockOK("OK", list))
+	c.JSON(http.StatusOK, model.OK(list))
 }
 
 func updateStockQuantity(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, model.StockFail("ID tidak valid"))
+		c.JSON(http.StatusBadRequest, model.BadRequest("Invalid ID format"))
 		return
 	}
 	var req model.UpdateStockRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, model.StockFail(err.Error()))
+		c.JSON(http.StatusBadRequest, model.ValidationError(err.Error()))
 		return
 	}
 	if err := usecase.UpdateStockQuantity(id, req); err != nil {
-		c.JSON(http.StatusInternalServerError, model.StockFail(err.Error()))
+		c.JSON(http.StatusInternalServerError, model.InternalError())
 		return
 	}
-	c.JSON(http.StatusOK, model.StockOK("Stock berhasil diupdate", nil))
+	c.JSON(http.StatusOK, model.Updated())
 }
 
 func deleteStock(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, model.StockFail("ID tidak valid"))
+		c.JSON(http.StatusBadRequest, model.BadRequest("Invalid ID format"))
 		return
 	}
 	if err := usecase.DeleteStock(id); err != nil {
-		c.JSON(http.StatusInternalServerError, model.StockFail(err.Error()))
+		c.JSON(http.StatusInternalServerError, model.InternalError())
 		return
 	}
-	c.JSON(http.StatusOK, model.StockOK("Stock berhasil dihapus", nil))
+	c.JSON(http.StatusOK, model.Deleted())
 }

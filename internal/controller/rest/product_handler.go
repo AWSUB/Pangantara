@@ -24,15 +24,15 @@ func ProductRoutes(r *gin.RouterGroup) {
 func createProduct(c *gin.Context) {
 	var req model.CreateProductRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, model.ProductFail(err.Error()))
+		c.JSON(http.StatusBadRequest, model.ValidationError(err.Error()))
 		return
 	}
 	data, err := usecase.CreateProduct(req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.ProductFail(err.Error()))
+		c.JSON(http.StatusInternalServerError, model.InternalError())
 		return
 	}
-	c.JSON(http.StatusCreated, model.ProductOK("Product berhasil dibuat", data))
+	c.JSON(http.StatusCreated, model.Created(data))
 }
 
 func getAllProduct(c *gin.Context) {
@@ -40,85 +40,85 @@ func getAllProduct(c *gin.Context) {
 	if category != "" {
 		list, err := usecase.GetProductByCategory(category)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, model.ProductFail(err.Error()))
+			c.JSON(http.StatusInternalServerError, model.InternalError())
 			return
 		}
-		c.JSON(http.StatusOK, model.ProductOK("OK", list))
+		c.JSON(http.StatusOK, model.OK(list))
 		return
 	}
 	list, err := usecase.GetAllProduct()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.ProductFail(err.Error()))
+		c.JSON(http.StatusInternalServerError, model.InternalError())
 		return
 	}
-	c.JSON(http.StatusOK, model.ProductOK("OK", list))
+	c.JSON(http.StatusOK, model.OK(list))
 }
 
 func getProductByID(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, model.ProductFail("ID tidak valid"))
+		c.JSON(http.StatusBadRequest, model.BadRequest("Invalid ID format"))
 		return
 	}
 	data, err := usecase.GetProductByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, model.ProductFail("Product tidak ditemukan"))
+		c.JSON(http.StatusNotFound, model.NotFound("Product"))
 		return
 	}
-	c.JSON(http.StatusOK, model.ProductOK("OK", data))
+	c.JSON(http.StatusOK, model.OK(data))
 }
 
 func getProductBySupplier(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("supplier_id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, model.ProductFail("ID tidak valid"))
+		c.JSON(http.StatusBadRequest, model.BadRequest("Invalid ID format"))
 		return
 	}
 	category := c.Query("category")
 	if category != "" {
 		list, err := usecase.GetProductBySupplierAndCategory(id, category)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, model.ProductFail(err.Error()))
+			c.JSON(http.StatusInternalServerError, model.InternalError())
 			return
 		}
-		c.JSON(http.StatusOK, model.ProductOK("OK", list))
+		c.JSON(http.StatusOK, model.OK(list))
 		return
 	}
 	list, err := usecase.GetProductBySupplier(id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.ProductFail(err.Error()))
+		c.JSON(http.StatusInternalServerError, model.InternalError())
 		return
 	}
-	c.JSON(http.StatusOK, model.ProductOK("OK", list))
+	c.JSON(http.StatusOK, model.OK(list))
 }
 
 func updateProduct(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, model.ProductFail("ID tidak valid"))
+		c.JSON(http.StatusBadRequest, model.BadRequest("Invalid ID format"))
 		return
 	}
 	var req model.UpdateProductRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, model.ProductFail(err.Error()))
+		c.JSON(http.StatusBadRequest, model.ValidationError(err.Error()))
 		return
 	}
 	if err := usecase.UpdateProduct(id, req); err != nil {
-		c.JSON(http.StatusInternalServerError, model.ProductFail(err.Error()))
+		c.JSON(http.StatusInternalServerError, model.InternalError())
 		return
 	}
-	c.JSON(http.StatusOK, model.ProductOK("Product berhasil diupdate", nil))
+	c.JSON(http.StatusOK, model.Updated())
 }
 
 func deleteProduct(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, model.ProductFail("ID tidak valid"))
+		c.JSON(http.StatusBadRequest, model.BadRequest("Invalid ID format"))
 		return
 	}
 	if err := usecase.DeleteProduct(id); err != nil {
-		c.JSON(http.StatusInternalServerError, model.ProductFail(err.Error()))
+		c.JSON(http.StatusInternalServerError, model.InternalError())
 		return
 	}
-	c.JSON(http.StatusOK, model.ProductOK("Product berhasil dihapus", nil))
+	c.JSON(http.StatusOK, model.Deleted())
 }

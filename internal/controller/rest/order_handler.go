@@ -3,6 +3,7 @@ package rest
 import (
 	"fmt"
 	"net/http"
+	"sppg-backend/internal/entity"
 	"sppg-backend/internal/model"
 	"sppg-backend/internal/usecase"
 
@@ -25,15 +26,15 @@ func OrderRoutes(r *gin.RouterGroup) {
 func createOrder(c *gin.Context) {
 	var req model.CreateOrderRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, model.OrderFail(err.Error()))
+		c.JSON(http.StatusBadRequest, model.ValidationError(err.Error()))
 		return
 	}
 	data, err := usecase.CreateOrder(req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.OrderFail(err.Error()))
+		c.JSON(http.StatusInternalServerError, model.InternalError())
 		return
 	}
-	c.JSON(http.StatusCreated, model.OrderOK("Order berhasil dibuat", data))
+	c.JSON(http.StatusCreated, model.Created(data))
 }
 
 func getAllOrder(c *gin.Context) {
@@ -51,10 +52,10 @@ func getAllOrder(c *gin.Context) {
 	if status == "" && sppgIDStr == "" && startDate == "" && endDate == "" {
 		list, err := usecase.GetAllOrder()
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, model.OrderFail(err.Error()))
+			c.JSON(http.StatusInternalServerError, model.InternalError())
 			return
 		}
-		c.JSON(http.StatusOK, model.OrderOK("OK", gin.H{"data": list, "total": len(list)}))
+		c.JSON(http.StatusOK, model.OK(gin.H{"data": list, "total": len(list)}))
 		return
 	}
 
@@ -62,7 +63,7 @@ func getAllOrder(c *gin.Context) {
 	if sppgIDStr != "" {
 		id, err := uuid.Parse(sppgIDStr)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, model.OrderFail("sppg_id tidak valid"))
+			c.JSON(http.StatusBadRequest, model.BadRequest("Invalid sppg_id format"))
 			return
 		}
 		sppgID = &id
@@ -78,72 +79,80 @@ func getAllOrder(c *gin.Context) {
 
 	list, total, err := usecase.GetOrdersFiltered(status, sppgID, startPtr, endPtr, page, limit)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.OrderFail(err.Error()))
+		c.JSON(http.StatusInternalServerError, model.InternalError())
 		return
 	}
-	c.JSON(http.StatusOK, model.OrderOK("OK", gin.H{
-		"data":  list,
-		"total": total,
-		"page":  page,
-		"limit": limit,
-	}))
+
+	c.JSON(http.StatusOK, model.OKPaginated(list, total, page, limit))
 }
 
 func getOrderByID(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, model.OrderFail("ID tidak valid"))
+		c.JSON(http.StatusBadRequest, model.BadRequest("Invalid ID format"))
 		return
 	}
 	data, err := usecase.GetOrderByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, model.OrderFail("Order tidak ditemukan"))
+		c.JSON(http.StatusNotFound, model.NotFound("Order"))
 		return
 	}
-	c.JSON(http.StatusOK, model.OrderOK("OK", data))
+	c.JSON(http.StatusOK, model.OK(data))
 }
 
 func getOrderBySPPGID(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("sppg_id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, model.OrderFail("ID tidak valid"))
+		c.JSON(http.StatusBadRequest, model.BadRequest("Invalid ID format"))
 		return
 	}
 	list, err := usecase.GetOrderBySPPGID(id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.OrderFail(err.Error()))
+		c.JSON(http.StatusInternalServerError, model.InternalError())
 		return
 	}
-	c.JSON(http.StatusOK, model.OrderOK("OK", list))
+	c.JSON(http.StatusOK, model.OK(list))
 }
 
 func updateOrderStatus(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, model.OrderFail("ID tidak valid"))
+		c.JSON(http.StatusBadRequest, model.BadRequest("Invalid ID format"))
 		return
 	}
 	var req model.UpdateOrderStatusRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, model.OrderFail(err.Error()))
+		c.JSON(http.StatusBadRequest, model.ValidationError(err.Error()))
 		return
 	}
 	if err := usecase.UpdateOrderStatus(id, req); err != nil {
-		c.JSON(http.StatusInternalServerError, model.OrderFail(err.Error()))
+		c.JSON(http.StatusInternalServerError, model.InternalError())
 		return
 	}
-	c.JSON(http.StatusOK, model.OrderOK("Status order berhasil diupdate", nil))
+	c.JSON(http.StatusOK, model.OKMessage("Order status updated successfully", nil))
 }
 
 func deleteOrder(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, model.OrderFail("ID tidak valid"))
+		c.JSON(http.StatusBadRequest, model.BadRequest("Invalid ID format"))
 		return
 	}
+
+	// Cek status order dulu
+	order, err := usecase.GetOrderByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, model.NotFound("Order"))
+		return
+	}
+	if order.OrderStatus != entity.OrderCancelled && order.OrderStatus != entity.OrderPending {
+		c.JSON(http.StatusBadRequest, model.BadRequest("Only pending or cancelled orders can be deleted"))
+		return
+	}
+
 	if err := usecase.DeleteOrder(id); err != nil {
-		c.JSON(http.StatusInternalServerError, model.OrderFail(err.Error()))
+		c.JSON(http.StatusInternalServerError, model.InternalError())
 		return
 	}
-	c.JSON(http.StatusOK, model.OrderOK("Order berhasil dihapus", nil))
+	c.JSON(http.StatusOK, model.Deleted())
 }

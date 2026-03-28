@@ -20,8 +20,8 @@ func DashboardRoutes(r *gin.RouterGroup) {
 func getDashboardSummary(c *gin.Context) {
 	summary, err := usecase.GetDashboardSummary()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, model.DashboardFail(err.Error()))
+		c.JSON(http.StatusInternalServerError, model.InternalError())
 		return
 	}
-	c.JSON(http.StatusOK, model.DashboardOK("OK", summary))
+	c.JSON(http.StatusOK, model.OK(summary))
 }

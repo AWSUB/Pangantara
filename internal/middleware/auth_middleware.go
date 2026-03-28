@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"sppg-backend/internal/model"
 	"sppg-backend/pkg/jwt"
@@ -13,23 +12,31 @@ import (
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
-		fmt.Println("Authorization Header:", authHeader)
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, model.UserFail("Token tidak ditemukan"))
+			c.JSON(http.StatusUnauthorized, model.Response{
+				Success: false,
+				Message: "Access token is required",
+			})
 			c.Abort()
 			return
 		}
 
 		parts := strings.SplitN(authHeader, " ", 2)
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			c.JSON(http.StatusUnauthorized, model.UserFail("Format token tidak valid"))
+			c.JSON(http.StatusUnauthorized, model.Response{
+				Success: false,
+				Message: "Invalid token format, use: Bearer <token>",
+			})
 			c.Abort()
 			return
 		}
 
 		claims, err := jwt.ValidateToken(parts[1])
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, model.UserFail("Token tidak valid atau sudah expired"))
+			c.JSON(http.StatusUnauthorized, model.Response{
+				Success: false,
+				Message: "Token is invalid or expired",
+			})
 			c.Abort()
 			return
 		}
@@ -44,7 +51,6 @@ func AuthMiddleware() gin.HandlerFunc {
 func RoleMiddleware(roles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		role := c.GetString("role")
-
 		allowed := false
 		for _, r := range roles {
 			if r == role {
@@ -52,13 +58,14 @@ func RoleMiddleware(roles ...string) gin.HandlerFunc {
 				break
 			}
 		}
-
 		if !allowed {
-			c.JSON(http.StatusForbidden, model.UserFail("Akses ditolak, role tidak diizinkan"))
+			c.JSON(http.StatusForbidden, model.Response{
+				Success: false,
+				Message: "You don't have permission to access this resource",
+			})
 			c.Abort()
 			return
 		}
-
 		c.Next()
 	}
 }
