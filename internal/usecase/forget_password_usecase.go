@@ -46,7 +46,7 @@ func ForgotPassword(req model.ForgotPasswordRequest) error {
 	}
 
 	// Kirim email
-	resetLink := "https://be-internship.bccdev.id/hanif/reset-password?token=" + token
+	resetLink := "https://pangantara.vercel.app/reset-password?token=" + token
 	if err := email.SendForgotPasswordEmail(user.Email, user.Name, resetLink); err != nil {
 		return err
 	}
